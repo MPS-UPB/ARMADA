@@ -1,0 +1,204 @@
+package dataaccess;
+
+import general.*;
+import java.sql.*;
+import java.util.*;
+
+public class DataBaseConnection {
+	public static Connection connection;
+	public static Statement query;
+
+	public DataBaseConnection() {
+	}
+
+	public static void openConnection() throws SQLException {
+		connection = DriverManager.getConnection(
+				general.Constants.DATABASE_CONNECTION,
+				general.Constants.DATABASE_USER,
+				general.Constants.DATABASE_PASSWORD);
+		query = connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
+				ResultSet.CONCUR_UPDATABLE);
+	}
+
+	public static void closeConnection() throws SQLException {
+		query.close();
+	}
+
+	public static int getTableNumberOfRows(String tableName)
+			throws SQLException {
+		int numberOfRows = -1;
+		openConnection();
+
+		String exp = "SELECT count(*) FROM " + tableName;
+		ResultSet inregistrari = query.executeQuery(exp);
+		inregistrari.first();
+		numberOfRows = inregistrari.getInt(1);
+
+		closeConnection();
+		return numberOfRows;
+	}
+
+	public static int getTableNumberOfColumns(String tableName) {
+		for (String[] tableStructure : general.Constants.DATABASE_STRUCTURE) {
+			if (tableName.equals(tableStructure[0])) {
+				return tableStructure.length - 1;
+			}
+		}
+		return -1;
+	}
+
+	public static String getTablePrimaryKey(String tableName) {
+		for (String[] tableStructure : general.Constants.DATABASE_STRUCTURE) {
+			if (tableName.equals(tableStructure[0])) {
+				return tableStructure[1];
+			}
+		}
+		return null;
+	}
+
+	public static ArrayList<String> getTableAttributes(String tableName) {
+		ArrayList<String> result = new ArrayList<String>();
+		for (String[] tableStructure : general.Constants.DATABASE_STRUCTURE) {
+			if (tableName.equals(tableStructure[0])) {
+				for (int currentColumn = 1; currentColumn < tableStructure.length; currentColumn++) {
+					result.add(tableStructure[currentColumn]);
+				}
+			}
+		}
+		return result;
+	}
+
+	public static ArrayList<ArrayList<Object>> getTableContent(
+			String tableName, ArrayList<String> attributes, String whereClause,
+			String orderByClause, String groupByClause) throws SQLException {
+		openConnection();
+		String expression = "SELECT ";
+		int numberOfColumns = -1;
+		if (attributes == null) {
+			numberOfColumns = getTableNumberOfColumns(tableName);
+			expression += "*";
+		} else {
+			numberOfColumns = attributes.size();
+			for (String attribute : attributes) {
+				expression += attribute + ", ";
+			}
+			expression = expression.substring(0, expression.length() - 2);
+		}
+		expression += " FROM " + tableName;
+		if (whereClause != null) {
+			expression += " WHERE " + whereClause;
+		}
+		if (groupByClause != null) {
+			expression += " GROUP BY " + groupByClause;
+		}
+		if (orderByClause != null) {
+			expression += " ORDER BY " + orderByClause;
+		}
+		if (general.Constants.DEBUG) {
+			System.out.println("query: " + expression);
+		}
+		if (numberOfColumns == -1) {
+			return null;
+		}
+		ArrayList<ArrayList<Object>> dataBaseContent = new ArrayList<ArrayList<Object>>();
+		ResultSet result = query.executeQuery(expression);
+		int currentRow = 0;
+		while (result.next()) {
+			dataBaseContent.add(new ArrayList<Object>());
+			for (int currentColumn = 0; currentColumn < numberOfColumns; currentColumn++) {
+				dataBaseContent.get(currentRow).add(
+						result.getString(currentColumn + 1));
+			}
+			currentRow++;
+		}
+		closeConnection();
+		return dataBaseContent;
+	}
+
+	public static void insertValuesIntoTable(String tableName,
+			ArrayList<String> attributes, ArrayList<String> values,
+			boolean skipPrimaryKey) throws Exception {
+		openConnection();
+		String expression = "INSERT INTO " + tableName + " (";
+		if (attributes == null) {
+			attributes = getTableAttributes(tableName);
+			if (skipPrimaryKey) {
+				attributes.remove(0);
+			}
+		}
+		if (attributes.size() != values.size()) {
+			throw new Exception("Attributes size does not match values size !"
+					+ attributes.size() + " " + values.size());
+		}
+		for (String attribute : attributes) {
+			expression += attribute + ", ";
+		}
+		expression = expression.substring(0, expression.length() - 2);
+		expression += ") VALUES (";
+		for (String currentValue : values) {
+			expression += "\'" + currentValue + "\',";
+		}
+		expression = expression.substring(0, expression.length() - 1);
+		expression += ")";
+		if (general.Constants.DEBUG) {
+			System.out.println("query: " + expression);
+		}
+		query.execute(expression);
+		closeConnection();
+	}
+
+	public static void updateRecordsIntoTable(String tableName,
+			ArrayList<String> attributes, ArrayList<String> values,
+			String whereClause) throws Exception {
+		openConnection();
+		String expression = "UPDATE " + tableName + " SET ";
+		if (attributes == null) {
+			attributes = getTableAttributes(tableName);
+		}
+		if (attributes.size() != values.size()) {
+			throw new Exception("Attributes size does not match values size.");
+		}
+		for (int currentIndex = 0; currentIndex < values.size(); currentIndex++) {
+			expression += attributes.get(currentIndex) + "="
+					+ values.get(currentIndex) + ", ";
+		}
+		expression = expression.substring(0, expression.length() - 2);
+		expression += " WHERE ";
+		if (whereClause != null) {
+			expression += whereClause;
+		} else {
+			expression += getTablePrimaryKey(tableName) + "\'" + values.get(0)
+					+ "\'";
+		}
+		if (general.Constants.DEBUG) {
+			System.out.println("query: " + expression);
+		}
+		query.execute(expression);
+		closeConnection();
+	}
+
+	public static void deleteRecordsFromTable(String tableName,
+			ArrayList<String> attributes, ArrayList<String> values,
+			String whereClause) throws Exception {
+		openConnection();
+		// TO DO: exercise 6
+		closeConnection();
+	}
+
+	public static String executeProcedure(String procedureName,
+			String inputParameter, int outputParameterType) throws SQLException {
+		String result = new String();
+		openConnection();
+		// TO DO: exercise 7
+		closeConnection();
+		return result;
+	}
+
+	public static ArrayList<ReferrencedTable> getReferrencedTables(
+			String tableName) {
+		ArrayList<ReferrencedTable> result = new ArrayList<ReferrencedTable>();
+		// TO DO: exercise 9
+		return result;
+	}
+
+}
