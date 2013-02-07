@@ -1,0 +1,4 @@
+<task>
+	<inputFile name="pic2.tif" />
+	<outputFile name="layout_output.xml" />
+</task>

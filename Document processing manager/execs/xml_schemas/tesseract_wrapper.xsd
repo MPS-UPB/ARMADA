@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+ <xs:simpleType name="execName">
+   <xs:restriction base="xs:string">
+     <xs:pattern value="tesseract_wrapper.exe"/>
+   </xs:restriction>
+ </xs:simpleType>
+ 
+ <xs:simpleType name="execType">
+   <xs:restriction base="xs:string">
+     <xs:pattern value="ocr"/>
+   </xs:restriction>
+ </xs:simpleType>
+ 
+ <xs:simpleType name="execDescription">
+   <xs:restriction base="xs:string">
+     <xs:pattern value="Extracts characters from text using Tesseract"/>
+   </xs:restriction>
+ </xs:simpleType>
+ 
+ <xs:complexType name="fileType">
+   <xs:attribute name="name" type="xs:string" use="required"/>
+ </xs:complexType>
+ 
+ <xs:simpleType name="DirType">
+   <xs:restriction base="xs:string">
+     <xs:enumeration value="ascending"/>
+     <xs:enumeration value="descending"/>
+   </xs:restriction>
+ </xs:simpleType>
+ 
+ <xs:complexType name="restrictedRectangleType">
+   <xs:attribute name="direction" type="DirType" use="required"/>
+   <xs:attribute name="top" type="xs:integer" use="required"/>
+   <xs:attribute name="bottom" type="xs:integer" use="required"/>
+   <xs:attribute name="left" type="xs:integer" use="required"/>
+   <xs:attribute name="right" type="xs:integer" use="required"/>
+ </xs:complexType>
+ 
+ <xs:element name="task">
+   <xs:complexType>
+     <xs:sequence>
+       <xs:element name="execInfo" minOccurs="0" maxOccurs="0">
+         <xs:complexType>
+           <xs:sequence>
+             <xs:element name="name" type="execName"/>
+             <xs:element name="type" type="execType"/>
+             <xs:element name="description" type="execDescription"/>
+           </xs:sequence>
+         </xs:complexType>
+       </xs:element>
+       
+       <xs:element name="inputFile" type="fileType"/>
+       <xs:element name="outputFile" type="fileType"/>
+       <xs:element name="TessPath" type="fileType" minOccurs="0" maxOccurs="1"/>
+       <xs:element name="processRectangle" type="restrictedRectangleType" minOccurs="1" maxOccurs="1"/>
+     </xs:sequence>
+   </xs:complexType>
+ </xs:element>
+</xs:schema>

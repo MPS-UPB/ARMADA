@@ -184,7 +184,7 @@ public class Confirmation_panel extends javax.swing.JFrame {
     	
 	}
 	private void actionBack(){
-		Workflowconfiguration.workflowconfiguration.setVisible(true);
+		WorkflowConfiguration.workflowconfiguration.setVisible(true);
 		confirmation_panel.setVisible(false);
 	}
     
